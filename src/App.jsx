@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 
 const App = () => {
-  // Initialize state from local storage if available
   const [columns, setColumns] = useState(() => JSON.parse(localStorage.getItem('columns')) || []);
   const [rows, setRows] = useState(() => JSON.parse(localStorage.getItem('rows')) || []);
   const [filter, setFilter] = useState({ colName: '', filterValue: '' });
   const [sortConfig, setSortConfig] = useState({ key: '', direction: '' });
 
-  // Effect to store columns and rows in local storage whenever they change
   useEffect(() => {
     localStorage.setItem('columns', JSON.stringify(columns));
     localStorage.setItem('rows', JSON.stringify(rows));
@@ -40,45 +38,25 @@ const App = () => {
     setFilter({ colName: '', filterValue: '' });
   };
 
-//   const filteredRows = rows.filter(row =>
-//   !filter.colName || row[filter.colName].some(val => Array.isArray(val) || typeof val === 'string' ? val.includes(filter.filterValue) : false)
-// );
+  const filteredRows = rows.filter(row => {
+    if (!filter.colName) return true;
 
-const filteredRows = rows.filter(row => {
-  // If no filter column is selected, show all rows
-  if (!filter.colName) return true;
-
-  // Get the column value for the current row
-  const colValue = row[filter.colName];
-
-  // Check if the value is an array (since you are storing values as arrays)
-  if (Array.isArray(colValue)) {
-    return colValue.some(val => {
-      // For string columns, use includes
-      if (typeof val === 'string') {
-        return val.includes(filter.filterValue);
-      }
-
-      // For number columns, compare the value
-      if (typeof val === 'number') {
-        // Convert filterValue to a number for comparison
-        const filterNum = Number(filter.filterValue);
-
-        // If the filterValue is not a valid number, show all rows
-        if (isNaN(filterNum)) return true;
-
-        // Perform numeric comparison
-        return val === filterNum; // Adjust this as needed (e.g., greater than or less than)
-      }
-
-      return false;
-    });
-  }
-
-  return false;
-});
-
-
+    const colValue = row[filter.colName];
+    if (Array.isArray(colValue)) {
+      return colValue.some(val => {
+        if (typeof val === 'string') {
+          return val.includes(filter.filterValue);
+        }
+        if (typeof val === 'number') {
+          const filterNum = Number(filter.filterValue);
+          if (isNaN(filterNum)) return true;
+          return val === filterNum;
+        }
+        return false;
+      });
+    }
+    return false;
+  });
 
   const sortRows = (colName, direction) => {
     const sortedRows = [...rows].sort((a, b) => {
@@ -92,6 +70,11 @@ const filteredRows = rows.filter(row => {
       return 0;
     });
     setRows(sortedRows);
+  };
+
+  const deleteRow = (rowIndex) => {
+    const updatedRows = rows.filter((_, index) => index !== rowIndex);
+    setRows(updatedRows);
   };
 
   return (
@@ -146,9 +129,6 @@ const filteredRows = rows.filter(row => {
                     >
                       Sort Asc
                     </button>
-                    <div>
-                      
-                    </div>
                     <button
                       onClick={() => sortRows(col.name, 'desc')}
                       className="text-sm text-gray-500"
@@ -159,6 +139,7 @@ const filteredRows = rows.filter(row => {
                 )}
               </th>
             ))}
+            <th className="border px-4 py-2">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -180,6 +161,15 @@ const filteredRows = rows.filter(row => {
                   />
                 </td>
               ))}
+              {/* Delete Row Button */}
+              <td className="border px-4 py-2">
+                <button
+                  onClick={() => deleteRow(rowIndex)}
+                  className="bg-red-500 text-white px-4 py-2"
+                >
+                  Delete
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
