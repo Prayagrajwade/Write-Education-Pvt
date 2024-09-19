@@ -40,9 +40,31 @@ const App = () => {
     setFilter({ colName: '', filterValue: '' });
   };
 
-  const filteredRows = rows.filter(row =>
-    !filter.colName || row[filter.colName].some(val => val.includes(filter.filterValue))
-  );
+  // const filteredRows = rows.filter(row =>
+  //   !filter.colName || row[filter.colName].some(val => val.includes(filter.filterValue))
+  // );
+
+  const filteredRows = rows.filter(row => {
+  const colValue = row[filter.colName][0]; // Get the first item in the array
+
+  // If no filter is applied, return the row
+  if (!filter.colName || filter.filterValue === '') return true;
+
+  // Handle string columns
+  if (typeof colValue === 'string') {
+    return colValue.includes(filter.filterValue);
+  }
+
+  // Handle number columns
+  if (typeof colValue === 'number') {
+    const filterNumber = parseFloat(filter.filterValue);
+    if (isNaN(filterNumber)) return true; // Avoid filtering if input is not a number
+    return colValue === filterNumber;
+  }
+
+  return false;
+});
+
 
   const sortRows = (colName, direction) => {
     const sortedRows = [...rows].sort((a, b) => {
