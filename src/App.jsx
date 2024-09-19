@@ -41,8 +41,9 @@ const App = () => {
   };
 
   const filteredRows = rows.filter(row =>
-    !filter.colName || row[filter.colName].some(val => val.includes(filter.filterValue))
-  );
+  !filter.colName || row[filter.colName].some(val => Array.isArray(val) || typeof val === 'string' ? val.includes(filter.filterValue) : false)
+);
+
 
   const sortRows = (colName, direction) => {
     const sortedRows = [...rows].sort((a, b) => {
