@@ -40,9 +40,44 @@ const App = () => {
     setFilter({ colName: '', filterValue: '' });
   };
 
-  const filteredRows = rows.filter(row =>
-  !filter.colName || row[filter.colName].some(val => Array.isArray(val) || typeof val === 'string' ? val.includes(filter.filterValue) : false)
-);
+//   const filteredRows = rows.filter(row =>
+//   !filter.colName || row[filter.colName].some(val => Array.isArray(val) || typeof val === 'string' ? val.includes(filter.filterValue) : false)
+// );
+
+const filteredRows = rows.filter(row => {
+  // If no filter column is selected, show all rows
+  if (!filter.colName) return true;
+
+  // Get the column value for the current row
+  const colValue = row[filter.colName];
+
+  // Check if the value is an array (since you are storing values as arrays)
+  if (Array.isArray(colValue)) {
+    return colValue.some(val => {
+      // For string columns, use includes
+      if (typeof val === 'string') {
+        return val.includes(filter.filterValue);
+      }
+
+      // For number columns, compare the value
+      if (typeof val === 'number') {
+        // Convert filterValue to a number for comparison
+        const filterNum = Number(filter.filterValue);
+
+        // If the filterValue is not a valid number, show all rows
+        if (isNaN(filterNum)) return true;
+
+        // Perform numeric comparison
+        return val === filterNum; // Adjust this as needed (e.g., greater than or less than)
+      }
+
+      return false;
+    });
+  }
+
+  return false;
+});
+
 
 
   const sortRows = (colName, direction) => {
