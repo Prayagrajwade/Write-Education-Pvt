@@ -129,6 +129,9 @@ const App = () => {
                     >
                       Sort Asc
                     </button>
+                    <div>
+                      
+                    </div>
                     <button
                       onClick={() => sortRows(col.name, 'desc')}
                       className="text-sm text-gray-500"
